@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepCount Pro</title>
+
+<style>
+/* ---------- GLOBAL STYLES ---------- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background 0.3s, color 0.3s;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    font-size: 28px;
+    font-weight: bold;
+}
+
+:root {
+    --bg: #ffffff;
+    --text: #000;
+    --card-bg: #f3f3f3;
+    --header-bg: #1976d2;
+    --header-text: white;
+}
+
+body.dark {
+    --bg: #121212;
+    --text: #ffffff;
+    --card-bg: #1f1f1f;
+    --header-bg: #333;
+    --header-text: #ffea00;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.container {
+    width: 90%;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* ----------- PROGRESS BAR ----------- */
+.progress-bar {
+    width: 100%;
+    background: #ddd;
+    height: 18px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress {
+    height: 18px;
+    width: 0%;
+    background: #28a745;
+    transition: width 1s ease-in-out;
+}
+
+/* ---------- BADGES ---------- */
+.badge {
+    display: inline-block;
+    background: gold;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin: 5px;
+    color: black;
+    font-weight: bold;
+    animation: pop 0.5s ease-out;
+}
+@keyframes pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+
+/* ---------- BUTTON ---------- */
+button {
+    padding: 10px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button:hover { background: #0d47a1; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 600px) {
+    header { font-size: 22px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>StepCount Pro</header>
+
+<div class="container">
+
+    <!-- Daily Steps -->
+    <div class="card">
+        <h2>Today's Steps</h2>
+        <p id="steps-display">Loading...</p>
+        <div class="progress-bar"><div id="progress" class="progress"></div></div>
+        <br>
+        <input type="number" id="goal-input" placeholder="Set Daily Goal">
+        <button onclick="setGoal()">Update Goal</button>
+    </div>
+
+    <!-- Weekly Summary -->
+    <div class="card">
+        <h2>Weekly Summary</h2>
+        <canvas id="weeklyChart" width="400" height="180"></canvas>
+    </div>
+
+    <!-- Badges -->
+    <div class="card">
+        <h2>Achievement Badges</h2>
+        <div id="badges"></div>
+    </div>
+
+    <!-- Trend Analytics -->
+    <div class="card">
+        <h2>Trend Analytics</h2>
+        <p id="trend-message"></p>
+    </div>
+
+    <!-- Motivational Message -->
+    <div class="card">
+        <h2>Motivation</h2>
+        <p id="motivation"></p>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="card">
+        <button onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+    </div>
+
+</div>
+
+<script>
+/* ------------------ MOCK DATA ------------------ */
+let dailySteps = Math.floor(Math.random() * 9000) + 1000;
+let dailyGoal = 10000;
+
+let weeklySteps = Array.from({ length: 7 }, () =>
+    Math.floor(Math.random() * 10000) + 2000
+);
+
+/* ------------------ DISPLAY DAILY STEPS ------------------ */
+function updateSteps() {
+    document.getElementById("steps-display").innerHTML =
+        `Steps: <b>${dailySteps}</b> / ${dailyGoal}`;
+
+    let percent = (dailySteps / dailyGoal) * 100;
+    document.getElementById("progress").style.width = percent + "%";
+
+    checkBadges();
+    updateTrend();
+    motivationalMessage();
+}
+updateSteps();
+
+/* ------------------ SET GOAL ------------------ */
+function setGoal() {
+    let newGoal = document.getElementById("goal-input").value;
+    if (newGoal > 0) {
+        dailyGoal = newGoal;
+        updateSteps();
+    }
+}
+
+/* ------------------ BADGES ------------------ */
+function checkBadges() {
+    let badgeArea = document.getElementById("badges");
+    badgeArea.innerHTML = "";
+
+    if (dailySteps >= 5000) badgeArea.innerHTML += `<span class="badge">5k Steps!</span>`;
+    if (dailySteps >= 10000) badgeArea.innerHTML += `<span class="badge">10k Champion!</span>`;
+    if (dailySteps >= 15000) badgeArea.innerHTML += `<span class="badge">15k Beast!</span>`;
+}
+
+/* ------------------ TREND ANALYTICS ------------------ */
+function updateTrend() {
+    let avg = weeklySteps.reduce((a,b)=>a+b,0) / 7;
+    let msg = "";
+
+    if (dailySteps > avg) msg = "You're above your weekly average! Great job!";
+    else msg = "Try to beat your weekly average today!";
+
+    document.getElementById("trend-message").innerText = msg;
+}
+
+/* ------------------ MOTIVATIONAL MESSAGE ------------------ */
+function motivationalMessage() {
+    const messages = [
+        "Keep moving! Every step counts!",
+        "You are stronger than you think.",
+        "Small steps lead to big changes.",
+        "Stay consistent and keep pushing!"
+    ];
+    document.getElementById("motivation").innerText =
+        messages[Math.floor(Math.random() * messages.length)];
+}
+
+/* ------------------ DARK/LIGHT MODE ------------------ */
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+}
+
+/* ------------------ WEEKLY CHART ------------------ */
+let ctx = document.getElementById("weeklyChart").getContext("2d");
+
+function drawChart() {
+    ctx.clearRect(0,0,400,200);
+    ctx.fillStyle = "#1976d2";
+
+    weeklySteps.forEach((value, index) => {
+        let barHeight = value / 50;
+        ctx.fillRect(50 * index, 200 - barHeight, 30, barHeight);
+    });
+}
+drawChart();
+
+</script>
+
+</body>
+</html>
